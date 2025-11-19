@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+      <h1>Welcome, {{ user.name }}</h1>
+
+    <h2>Your Info</h2>
+    <p>Email: {{ user.email }}</p>
+
+    <h3>Edit Profile</h3>
+    <form method="POST">
+        <label>Name:</label>
+        <input type="text" name="name" value="{{ user.name }}"><br>
+
+        <label>Major:</label>
+        <input type="text" name="major" value="{{ user.major }}"><br>
+
+        <label>Study Style:</label>
+        <select name="study_style">
+            <option value="quiet" {% if user.study_style=='quiet' %}selected{% endif %}>Quiet</option>
+            <option value="discussion" {% if user.study_style=='discussion' %}selected{% endif %}>Discussion</option>
+            <option value="flashcards" {% if user.study_style=='flashcards' %}selected{% endif %}>Flashcards</option>
+        </select><br>
+
+        <button type="submit">Update Profile</button>
+    </form>
+
+    <br>
+    <a href="/logout">Logout</a>
+</body>
+</html>

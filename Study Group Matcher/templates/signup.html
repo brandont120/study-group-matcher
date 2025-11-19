@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Study Group Matcher</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h1>Create an Account</h1>
+    <form method="POST">
+        <label>Name:</label>
+        <input type="text" name="name" required><br>
+
+        <label>Email:</label>
+        <input type="email" name="email" required><br>
+
+        <label>Password:</label>
+        <input type="password" name="password" required><br>
+
+        <label>Major:</label>
+        <input type="text" name="major"><br>
+
+        <label>Study Style:</label>
+        <select name="study_style">
+            <option value="quiet">Quiet</option>
+            <option value="discussion">Discussion</option>
+            <option value="flashcards">Flashcards</option>
+        </select><br>
+
+        <button type="submit">Sign Up</button>
+    </form>
+    <a href="/login">Already have an account? Login</a>
+</body>
+</html>
