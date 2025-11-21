@@ -1,19 +1,24 @@
-import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify
 from models import User
 from extensions import db, bcrypt
-import create_access_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 
-auth = Blueprint("auth", __name__)
+
+auth = Blueprint("auth", __name__, url_prefix="/api/auth")
+
 
 # SIGNUP
 @auth.post("/signup")
 def signup():
-    data = request.json
+    data = request.get_json() or {}
     name = data.get("name")
     email = data.get("email")
     password = data.get("password")
     major = data.get("major")
     study_style = data.get("study_style")
+
+    if not email or not password or not name:
+        return jsonify({"error": "name, email and password required"}), 400
 
     if User.query.filter_by(email=email).first():
         return jsonify({"error": "Email already exists"}), 400
@@ -25,21 +30,24 @@ def signup():
         email=email,
         password_hash=hashed_pw,
         major=major,
-        study_style=study_style
+        study_style=study_style,
     )
 
     db.session.add(user)
     db.session.commit()
 
-    return jsonify({"message": "User created successfully"}), 201
+    return jsonify({"message": "User created successfully", "user": {"id": user.id, "email": user.email}}), 201
 
 
 # LOGIN
 @auth.post("/login")
 def login():
-    data = request.json
+    data = request.get_json() or {}
     email = data.get("email")
     password = data.get("password")
+
+    if not email or not password:
+        return jsonify({"error": "email and password required"}), 400
 
     user = User.query.filter_by(email=email).first()
 
@@ -50,7 +58,7 @@ def login():
     return jsonify({"token": token, "user": {
         "id": user.id,
         "name": user.name,
-        "email": user.email
+        "email": user.email,
     }})
 
 
@@ -61,7 +69,10 @@ def update_profile():
     user_id = get_jwt_identity()
     user = User.query.get(user_id)
 
-    data = request.json
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    data = request.get_json() or {}
 
     user.name = data.get("name", user.name)
     user.major = data.get("major", user.major)
@@ -73,5 +84,5 @@ def update_profile():
         "id": user.id,
         "name": user.name,
         "major": user.major,
-        "study_style": user.study_style
+        "study_style": user.study_style,
     }})

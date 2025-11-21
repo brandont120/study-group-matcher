@@ -1,14 +1,31 @@
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect, session, send_from_directory
 from models import db, User
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_cors import CORS
+import os
+
+from extensions import db as database, bcrypt, jwt
+from routes_auth import auth as auth_blueprint
+
 
 app = Flask(__name__)
 app.secret_key = "devkey"
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///study.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+# JWT secret for API tokens (use env var in production)
+app.config["JWT_SECRET_KEY"] = "dev-jwt-secret"
 
-db.init_app(app)
+# initialize extensions
+database.init_app(app)
+bcrypt.init_app(app)
+jwt.init_app(app)
+
+# enable CORS for API endpoints during development
+CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}})
+
+# register API blueprints
+app.register_blueprint(auth_blueprint)
 
 
 @app.route("/signup", methods=["GET", "POST"])
@@ -65,3 +82,19 @@ def logout():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve_frontend(path):
+    # If a built React app is present in ../dist, serve it. Otherwise fall back to template routes.
+    dist_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'dist'))
+    if os.path.exists(dist_dir):
+        if path != "" and os.path.exists(os.path.join(dist_dir, path)):
+            return send_from_directory(dist_dir, path)
+        index_path = os.path.join(dist_dir, 'index.html')
+        if os.path.exists(index_path):
+            return send_from_directory(dist_dir, 'index.html')
+    # dist not present; let existing template routes handle the request
+    # return 404 to allow Flask to try other routes
+    return "Not Found", 404

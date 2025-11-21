@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "postbuild": "powershell -NoProfile -Command \"Copy-Item -Path .\\dist\\* -Destination '.\\Study Group Matcher\\static\\' -Recurse -Force; Copy-Item -Path .\\dist\\index.html -Destination '.\\Study Group Matcher\\templates\\' -Force\"",
     "lint": "eslint .",
     "preview": "vite preview"
   },
