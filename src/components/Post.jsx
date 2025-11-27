@@ -44,11 +44,6 @@ export default function Post({ post, onDelete, onLike, onComment }) {
         )}
       </div>
 
-      {isOwner && (
-        <button className="delete-btn" onClick={() => onDelete(post.id)}>
-          Delete Post
-        </button>
-      )}
 
       <p className="post-content">{post.content}</p>
 
@@ -56,12 +51,19 @@ export default function Post({ post, onDelete, onLike, onComment }) {
         <button className="like-btn" onClick={() => onLike(post.id)}>
           Like ({post.likes})
         </button>
+        
         <button
           className="comment-toggle-btn"
           onClick={() => setShowComments(!showComments)}
         >
           Comments ({post.comments.length})
         </button>
+
+        {isOwner && (
+        <button className="delete-btn" onClick={() => onDelete(post.id)}>
+          Delete
+        </button>
+      )}
       </div>
 
       {showComments && (

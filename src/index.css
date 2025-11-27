@@ -78,5 +78,18 @@ button:focus-visible {
 .post-content {
   margin: 8px 0 12px;
   font-size: 0.98rem;
-  line-height: 1.4;
+  line-height: 2.4;
 }
+
+.post-actions {
+  display: flex;
+  gap: 10px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;   
+}
+
+
