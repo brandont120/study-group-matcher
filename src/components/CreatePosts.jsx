@@ -12,7 +12,11 @@ export default function CreatePost({onPost}){
 
     return (
         <form onSubmit = {Submit}>
-            <textarea placeholder = "Write your post" value = {text} onChange = {(e) => setText(e.target.value)}/>
+            <textarea 
+                placeholder = "Write your post" 
+                value = {text} 
+                onChange = {(e) => setText(e.target.value)}
+            />
             <button type = "submit">Post</button>
         </form>
     );
