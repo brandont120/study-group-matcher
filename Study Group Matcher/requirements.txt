@@ -3,3 +3,4 @@ Flask-SQLAlchemy
 Flask-Cors
 Flask-Bcrypt
 Flask-JWT-Extended
+gunicorn

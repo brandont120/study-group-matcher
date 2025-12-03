@@ -8,7 +8,7 @@ if defined _OLD_CODEPAGE (
     "%SystemRoot%\System32\chcp.com" 65001 > nul
 )
 
-set VIRTUAL_ENV=C:\Users\zzion\OneDrive\Desktop\Study Group Matcher\venv
+set VIRTUAL_ENV=C:\Users\zzion\Downloads\Team-17-dev\study-group-matcher\Study Group Matcher\venv
 
 if not defined PROMPT set PROMPT=$P$G
 

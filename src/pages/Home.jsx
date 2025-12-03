@@ -1,11 +1,16 @@
 import {useState, useEffect} from "react";
+import { useNavigate } from "react-router-dom";
 import CreatePost from "../components/CreatePosts";
 import Post from "../components/Post";
+import "../styles/Home.css";
 
 export default function Home() {
     const [posts, setPosts] = useState([]);
-
+    const [allPosts, setAllPosts] = useState([]);
     const [loggedIn, setLoggedIn] = useState(Boolean(localStorage.getItem("token")));
+    const [loading, setLoading] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
+    const navigate = useNavigate();
 
     useEffect(() => {
         const onStorage = () => setLoggedIn(Boolean(localStorage.getItem("token")));
@@ -13,70 +18,189 @@ export default function Home() {
         return () => window.removeEventListener("storage", onStorage);
     }, []);
 
-    function addPost(text){
-        const newPost = {
-            id: Date.now(), 
-            author: "You", 
-            content: text,
-            likes: 0,
-            comments: []
-        };
-        setPosts([newPost, ...posts]);
-    }
+    useEffect(() => {
+        if (loggedIn) {
+            loadPosts();
+        }
+    }, [loggedIn]);
 
-    function deletePost(postId){
-        setPosts(posts.filter(post=> post.id !==postId))
-    }
-
-    function likePost(postId){
-        setPosts(posts.map(post=> {
-            if (post.id === postId){
-                return { ...post, likes: post.likes + 1 };
+    async function loadPosts() {
+        try {
+            const response = await fetch("http://localhost:5000/api/posts");
+            if (response.ok) {
+                const data = await response.json();
+                setAllPosts(data.posts);
+                setPosts(data.posts);
             }
-            return post;
-        }));
+        } catch (error) {
+            console.error("Error loading posts:", error);
+        }
     }
 
-    function addComment(postId, commentText){
-        setPosts(posts.map(post => {
-            if (post.id === postId) {
-                const newComment = {
-                    id: Date.now(),
-                    author: "You",
+    async function searchPosts(query) {
+        setSearchQuery(query);
+        if (!query.trim()) {
+            setPosts(allPosts);
+            return;
+        }
+        try {
+            const response = await fetch(`http://localhost:5000/api/posts/search?q=${encodeURIComponent(query)}`);
+            if (response.ok) {
+                const data = await response.json();
+                setPosts(data.posts);
+            }
+        } catch (error) {
+            console.error("Error searching posts:", error);
+        }
+    }
+
+    async function addPost(post){
+        const newPosts = [post, ...posts];
+        setPosts(newPosts);
+        setAllPosts(newPosts);
+    }
+
+    async function deletePost(postId){
+        try {
+            const response = await fetch(`http://localhost:5000/api/posts/${postId}`, {
+                method: "DELETE"
+            });
+            if (response.ok) {
+                const filtered = posts.filter(post => post.id !== postId);
+                setPosts(filtered);
+                setAllPosts(filtered);
+            }
+        } catch (error) {
+            console.error("Error deleting post:", error);
+        }
+    }
+
+    async function likePost(postId){
+        try {
+            const response = await fetch(`http://localhost:5000/api/posts/${postId}/like`, {
+                method: "POST",
+                headers: {"Content-Type": "application/json"}
+            });
+            if (response.ok) {
+                const updatedPost = await response.json();
+                const updated = posts.map(post => post.id === postId ? updatedPost : post);
+                setPosts(updated);
+                setAllPosts(updated);
+            }
+        } catch (error) {
+            console.error("Error liking post:", error);
+        }
+    }
+
+    async function addComment(postId, commentText){
+        const user = JSON.parse(localStorage.getItem("user") || '{"name":"You"}');
+        try {
+            const response = await fetch(`http://localhost:5000/api/posts/${postId}/comment`, {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({
+                    author: user.name,
                     text: commentText
-                };
-                return {...post, comments: [...post.comments, newComment]};
+                })
+            });
+            if (response.ok) {
+                const updatedPost = await response.json();
+                const updated = posts.map(post => post.id === postId ? updatedPost : post);
+                setPosts(updated);
+                setAllPosts(updated);
             }
-            return post;
-        }));
+        } catch (error) {
+            console.error("Error adding comment:", error);
+        }
     }
 
     return(
-        <div>
-            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                <h1>Feed</h1>
-                <div>
-                    {!loggedIn ? (
-                        <>
-                            <a href="/signup" style={{marginRight: 8, padding: '8px 12px', background: '#0b5fff', color: 'white', textDecoration: 'none', borderRadius: 4}}>Sign Up</a>
-                            <a href="/login" style={{padding: '8px 12px', background: '#00a86b', color: 'white', textDecoration: 'none', borderRadius: 4}}>Log In</a>
-                        </>
-                    ) : (
-                        <a href="/profile" style={{padding: '8px 12px', background: '#f59e0b', color: 'white', textDecoration: 'none', borderRadius: 4}}>Profile</a>
-                    )}
+        <div className="home-container">
+            <div className="home-header">
+                <div className="header-content">
+                    <h1>Study Group Feed</h1>
+                    <p>Connect with study partners, share posts, and find study groups</p>
                 </div>
+                {!loggedIn && (
+                    <div className="auth-buttons">
+                        <button 
+                            className="btn-signup"
+                            onClick={() => navigate("/signup")}
+                        >
+                            Sign Up
+                        </button>
+                        <button 
+                            className="btn-login"
+                            onClick={() => navigate("/login")}
+                        >
+                            Log In
+                        </button>
+                    </div>
+                )}
             </div>
 
-            <CreatePost onPost = {addPost}/>
-            {posts.map((post) => (
-                <Post
-                    key = {post.id}
-                    post = {post}
-                    onDelete = {deletePost}
-                    onLike = {likePost}
-                    onComment = {addComment}
-                />
-            ))}
+            {loggedIn && (
+                <div className="posts-section">
+                    <div className="search-container">
+                        <input 
+                            type="text" 
+                            placeholder="🔍 Search posts by keyword..." 
+                            value={searchQuery}
+                            onChange={(e) => searchPosts(e.target.value)}
+                            className="post-search"
+                        />
+                    </div>
+                    <CreatePost onPost={addPost}/>
+                    <div className="posts-list">
+                        {posts.length === 0 ? (
+                            <div className="no-posts">
+                                <p>No posts yet. Be the first to share!</p>
+                            </div>
+                        ) : (
+                            posts.map((post) => (
+                                <Post
+                                    key = {post.id}
+                                    post = {post}
+                                    onDelete = {deletePost}
+                                    onLike = {likePost}
+                                    onComment = {addComment}
+                                />
+                            ))
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {!loggedIn && (
+                <div className="welcome-section">
+                    <div className="welcome-card">
+                        <h2>Welcome to Study Group Matcher</h2>
+                        <p>Find the perfect study partners for your courses. Connect with students who share your classes and study style.</p>
+                        <div className="features">
+                            <div className="feature">
+                                <span className="feature-icon">🎯</span>
+                                <h3>Smart Matching</h3>
+                                <p>Find study partners based on shared courses and study preferences</p>
+                            </div>
+                            <div className="feature">
+                                <span className="feature-icon">👥</span>
+                                <h3>Study Groups</h3>
+                                <p>Create and join study groups for your courses</p>
+                            </div>
+                            <div className="feature">
+                                <span className="feature-icon">💬</span>
+                                <h3>Direct Messaging</h3>
+                                <p>Connect with other students and discuss study topics</p>
+                            </div>
+                            <div className="feature">
+                                <span className="feature-icon">📚</span>
+                                <h3>Course-Based</h3>
+                                <p>Organize study groups by your enrolled courses</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

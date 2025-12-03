@@ -1,6 +1,7 @@
 from extensions import db
 from sqlalchemy.dialects.sqlite import BLOB
 import uuid
+from datetime import datetime
 
 def generate_uuid():
     return str(uuid.uuid4())
@@ -62,3 +63,16 @@ class GroupMembers(db.Model):
 
     group = db.relationship("Groups", back_populates="members")
     user = db.relationship("User", back_populates="groups")
+
+
+class Message(db.Model):
+    __tablename__ = "messages"
+
+    id = db.Column(db.String, primary_key=True, default=generate_uuid)
+    sender_id = db.Column(db.String, db.ForeignKey("users.id"), nullable=False)
+    recipient_id = db.Column(db.String, db.ForeignKey("users.id"), nullable=False)
+    text = db.Column(db.Text, nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    sender = db.relationship("User", foreign_keys=[sender_id], backref="sent_messages")
+    recipient = db.relationship("User", foreign_keys=[recipient_id], backref="received_messages")

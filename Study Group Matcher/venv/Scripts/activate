@@ -38,7 +38,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="C:\Users\zzion\OneDrive\Desktop\Study Group Matcher\venv"
+VIRTUAL_ENV="C:\Users\zzion\Downloads\Team-17-dev\study-group-matcher\Study Group Matcher\venv"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"

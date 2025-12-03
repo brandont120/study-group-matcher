@@ -1,0 +1,171 @@
+/* Connections page styling - Gen Z aesthetic */
+
+.connections-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px 20px;
+}
+
+.connections-container h1 {
+    background: linear-gradient(90deg, #ff7edb, #7af7ff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 32px;
+    font-weight: 800;
+}
+
+.connections-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-top: 30px;
+}
+
+.section {
+    background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+    padding: 20px;
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.03);
+}
+
+.section h2 {
+    background: linear-gradient(90deg, #ff7edb, #7af7ff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    border-bottom: 2px solid rgba(255,255,255,0.04);
+    padding-bottom: 15px;
+    margin-top: 0;
+    font-size: 20px;
+}
+
+.user-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.user-card {
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    padding: 15px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.03);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+
+.user-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(0,212,255,0.2);
+    border-color: rgba(0,212,255,0.2);
+}
+
+.user-card.connected {
+    border-left: 4px solid #2ed573;
+}
+
+.user-info {
+    flex: 1;
+}
+
+.user-info h3 {
+    margin: 0 0 8px 0;
+    color: #f1f5f9;
+    font-size: 16px;
+}
+
+.major {
+    color: #00d4ff;
+    font-weight: 700;
+    margin: 5px 0;
+    font-size: 13px;
+}
+
+.study-style {
+    color: #cbd5e1;
+    font-size: 13px;
+    margin: 5px 0;
+}
+
+.match-score {
+    color: #2ed573;
+    font-size: 13px;
+    margin: 8px 0 0 0;
+    font-weight: 700;
+}
+
+.btn-connect {
+    background: linear-gradient(90deg, #8a2be2, #00d4ff);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 700;
+    white-space: nowrap;
+    transition: transform 0.2s, box-shadow 0.2s;
+    margin-left: 15px;
+    font-size: 13px;
+}
+
+.btn-connect:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(138,43,226,0.4);
+}
+
+.connection-badge {
+    background: #2ed573;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 10px;
+    font-weight: 700;
+    white-space: nowrap;
+    margin-left: 15px;
+    font-size: 13px;
+}
+
+.no-data {
+    text-align: center;
+    color: #94a3b8;
+    padding: 20px;
+    font-style: italic;
+}
+
+.error-message {
+    background-color: rgba(255,71,87,0.1);
+    color: #ff9aa2;
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    text-align: center;
+    border-left: 4px solid #ff4757;
+}
+
+@media (max-width: 768px) {
+    .connections-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .user-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .btn-connect,
+    .connection-badge {
+        margin-left: 0;
+        margin-top: 10px;
+        width: 100%;
+        text-align: center;
+    }
+
+    .connections-container h1 {
+        font-size: 24px;
+    }
+}

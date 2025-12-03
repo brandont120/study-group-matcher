@@ -86,3 +86,22 @@ def update_profile():
         "major": user.major,
         "study_style": user.study_style,
     }})
+
+
+# GET PROFILE
+@auth.get("/profile")
+@jwt_required()
+def get_profile():
+    user_id = get_jwt_identity()
+    user = User.query.get(user_id)
+
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    return jsonify({
+        "id": user.id,
+        "name": user.name,
+        "email": user.email,
+        "major": user.major,
+        "study_style": user.study_style,
+    })

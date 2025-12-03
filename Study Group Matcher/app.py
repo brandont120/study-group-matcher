@@ -6,6 +6,10 @@ import os
 
 from extensions import db as database, bcrypt, jwt
 from routes_auth import auth as auth_blueprint
+from routes_courses import courses_bp
+from routes_groups import groups_bp
+from routes_recommendations import recommendations_bp
+from routes_messages import messages_bp
 
 
 app = Flask(__name__)
@@ -22,10 +26,102 @@ bcrypt.init_app(app)
 jwt.init_app(app)
 
 # enable CORS for API endpoints during development
-CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}})
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 # register API blueprints
 app.register_blueprint(auth_blueprint)
+app.register_blueprint(courses_bp)
+app.register_blueprint(groups_bp)
+app.register_blueprint(recommendations_bp)
+app.register_blueprint(messages_bp)
+
+# Posts storage (in-memory for now, can be moved to database)
+posts_storage = []
+
+@app.route("/api/posts", methods=["GET"])
+def get_posts():
+    return {"posts": posts_storage}, 200
+
+@app.route("/api/posts", methods=["POST"])
+def create_post():
+    from datetime import datetime
+    data = request.get_json()
+    post = {
+        "id": len(posts_storage) + 1,
+        "author": data.get("author", "Anonymous"),
+        "author_id": data.get("author_id", None),
+        "content": data.get("content", ""),
+        "image": data.get("image", None),  # base64 or URL
+        "likes": 0,
+        "liked_by": [],
+        "comments": [],
+        "timestamp": datetime.now().isoformat()
+    }
+    posts_storage.insert(0, post)
+    return post, 201
+
+@app.route("/api/posts/<int:post_id>", methods=["DELETE"])
+def delete_post(post_id):
+    global posts_storage
+    posts_storage = [p for p in posts_storage if p["id"] != post_id]
+    return {"success": True}, 200
+
+@app.route("/api/posts/<int:post_id>/like", methods=["POST"])
+def like_post(post_id):
+    for post in posts_storage:
+        if post["id"] == post_id:
+            post["likes"] += 1
+            return post, 200
+    return {"error": "Post not found"}, 404
+
+@app.route("/api/posts/<int:post_id>/comment", methods=["POST"])
+def comment_post(post_id):
+    from datetime import datetime
+    data = request.get_json()
+    for post in posts_storage:
+        if post["id"] == post_id:
+            comment = {
+                "id": len(post["comments"]) + 1,
+                "author": data.get("author", "Anonymous"),
+                "text": data.get("text", ""),
+                "timestamp": datetime.now().isoformat()
+            }
+            post["comments"].append(comment)
+            return post, 200
+    return {"error": "Post not found"}, 404
+
+# Messaging endpoints are provided by the `routes_messages` blueprint (DB-backed)
+
+@app.route("/api/users/search", methods=["GET"])
+def search_users():
+    query = request.args.get("q", "").lower()
+    if not query:
+        return {"users": []}, 200
+    
+    results = User.query.filter(
+        (User.name.ilike(f"%{query}%")) |
+        (User.email.ilike(f"%{query}%")) |
+        (User.major.ilike(f"%{query}%"))
+    ).limit(20).all()
+    
+    users = [{
+        "id": u.id,
+        "name": u.name,
+        "email": u.email,
+        "major": u.major,
+        "study_style": u.study_style
+    } for u in results]
+    
+    return {"users": users}, 200
+
+@app.route("/api/posts/search", methods=["GET"])
+def search_posts():
+    query = request.args.get("q", "").lower()
+    if not query:
+        return {"posts": posts_storage}, 200
+    
+    results = [p for p in posts_storage if query in p["content"].lower() or query in p["author"].lower()]
+    return {"posts": results}, 200
 
 
 @app.route("/signup", methods=["GET", "POST"])
